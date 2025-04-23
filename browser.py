@@ -10,7 +10,7 @@ async def main():
 
     # Create MCPClient from config file
     client = MCPClient.from_config_file(
-        os.path.join(os.path.dirname(__file__), "browser_mcp.json")
+        os.path.join(os.path.dirname(__file__), "config/browser_mcp.json")
     )
 
     # Create LLM
@@ -20,16 +20,21 @@ async def main():
     agent = MCPAgent(
         llm=llm,
         client=client, 
-        max_steps=10,
+        max_steps=30,
         verbose=True
     )
 
     # Run the query
-    result = await agent.run(
-        "Find the best restaurant in London USING GOOGLE SEARCH",
-        max_steps=10,
-    )
-    print(f"\nResult: {result}")
+    try:
+        result = await agent.run(
+            "Find the best restaurant in London USING GOOGLE SEARCH",
+            max_steps=30,
+        )
+        print(f"\nRESULT:\n\n{result[0]['text']}\n\n")
+    finally:
+        # Ensure we clean up resources properly
+        if client.sessions:
+            await client.close_all_sessions()
 
 if __name__ == "__main__":
     asyncio.run(main())
